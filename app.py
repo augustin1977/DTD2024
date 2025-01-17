@@ -13,7 +13,7 @@ ai=AI(df)
 
 @cl.on_chat_start
 async def on_chat_start():
-    prompt="Posso te ugerir uma equipe para um projeto, mas preciso que descreva o tipo de problema que você está querendo resolver:"
+    prompt="Posso te sugerir uma equipe para um projeto, mas preciso que descreva o tipo de problema que você está querendo resolver:"
     await cl.Message(content=prompt).send()
     
 @cl.on_message
