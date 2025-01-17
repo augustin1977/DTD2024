@@ -2,7 +2,7 @@ import chainlit as cl
 from ai import *
 from importando_dados import *
 from funcoes_auxiliares import *
-
+# Criando os objeto
 root=os.getcwd()
 endereco=os.path.join(root,"Extração de dados","Relatórios Biblioteca")
 planilha=Importacao(endereco)
@@ -10,12 +10,12 @@ planilha.importa_dados()
 planilha.cria_json()
 df=planilha.get_df()
 ai=AI(df)
-
+# definido mensagem de entrada
 @cl.on_chat_start
 async def on_chat_start():
     prompt="Posso te sugerir uma equipe para um projeto, mas preciso que descreva o tipo de problema que você está querendo resolver:"
     await cl.Message(content=prompt).send()
-    
+    # respodendo
 @cl.on_message
 async def main(message: cl.Message):
     
