@@ -1,7 +1,6 @@
 # Especific project files exclusion
 /modelo
 v1.0 - backup/
-
 *.xlsx
 *.XLSX
 .XLSX
@@ -11,6 +10,8 @@ v1.0 - backup/
 *.json
 *.JSON
 *.npy
+DTD2024.code-workspace
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
