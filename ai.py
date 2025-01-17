@@ -10,33 +10,36 @@ from funcoes_auxiliares import *
 class AI:
     def __init__(self, df):
         print("#### Iniciando o treinamento ####")
-        self.pasta=os.getcwd()
+        pasta=os.getcwd()
+        self.local=os.path.join(pasta,"modelo")
         self.ai_model="neuralmind/bert-large-portuguese-cased"
         self.df = df
-        self.tokenizer = AutoTokenizer.from_pretrained(self.ai_model)
-        self.model = AutoModel.from_pretrained(self.ai_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.ai_model,cache_dir=self.local)
+        self.model = AutoModel.from_pretrained(self.ai_model,cache_dir=self.local)
         self.vectorizer = TfidfVectorizer()
         self.projetos_selecionados=[]
-        if os.path.exists('tokens.json'):
+        self.token_file= os.path.join(self.local,'tokens.json')
+        self.embeddings_file= os.path.join(self.local,'embeddings.npy')
+        if os.path.exists(self.token_file):
             print("Carregando tokens existentes...")
-            with open('tokens.json', 'r', encoding='utf-8') as f:
+            with open(self.token_file, 'r', encoding='utf-8') as f:
                 tokens = json.load(f)
             self.df['Tokens'] = tokens
         else:
             print("Gerando tokens...")
             self.df['Tokens'] = self.df['Resumo_limpo'].apply(lambda x: self.tokenizer.tokenize(x))
-            with open('tokens.json', 'w', encoding='utf-8') as f:
+            with open(self.token_file, 'w', encoding='utf-8') as f:
                 json.dump(self.df['Tokens'].tolist(), f, ensure_ascii=False, indent=4)
 
-        if os.path.exists('embeddings.npy'):
+        if os.path.exists(self.embeddings_file):
             print("Carregando embeddings existentes...")
-            embeddings = np.load('embeddings.npy')
+            embeddings = np.load(self.embeddings_file)
             self.df['Embedding'] = list(embeddings)
         else:
             print("Não encontrado arquivo de Embeddings")
             self.gerar_embeddings()
             embeddings = np.vstack(self.df['Embedding'].values)
-            np.save('embeddings.npy', embeddings)
+            np.save(self.embeddings_file, embeddings)
 
         self.tfidf_matrix = self.vectorizer.fit_transform(self.df['Resumo_limpo'])
 

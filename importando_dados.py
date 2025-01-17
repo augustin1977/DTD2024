@@ -19,7 +19,7 @@ class Importacao:
 		
 	def abre_arquivo(self,arquivo):
 		if ".XLSX" in arquivo.upper():
-			print(f"Processando o arquivo {arquivo}")
+			# print(f"Processando o arquivo {arquivo}")
 			self.workbook = openpyxl.load_workbook(arquivo)
 			self.sheet=self.workbook["Sheet1"]
 		else:
@@ -69,7 +69,7 @@ class Importacao:
 		print("#####Importanto dados dos arquivos#####")
 		nltk.download('stopwords')
 		self.stop_words=set(stopwords.words('portuguese'))
-		print(self.stop_words)
+		# print(self.stop_words)
 		for arquivo in self.arquivos:
 			abre_arquivo=os.path.join(self.pasta,arquivo)
 			self.abre_arquivo(abre_arquivo)
