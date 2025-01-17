@@ -11,6 +11,7 @@ import pandas as pd
 
 class Importacao:
 	def __init__(self,pasta):
+		"""Inicializa a classe importação"""
 		self.pasta=pasta
 		self.arquivos=os.listdir(pasta)
 		self.dados=[]

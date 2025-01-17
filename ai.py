@@ -9,6 +9,8 @@ from transformers import AutoModel,AutoTokenizer
 from funcoes_auxiliares import *
 class AI:
     def __init__(self, df):
+        """Inicializa a AI baixando o modelo caso não estja na pasta modelo
+        e cria a lista de tokes e de embbedings caso não estejam na pasta modelo"""
         print("#### Iniciando o treinamento ####")
         pasta=os.getcwd()
         self.local=os.path.join(pasta,"modelo")
@@ -56,6 +58,8 @@ class AI:
         print("Embeddings gerados com sucesso!")
 
     def buscar_resposta(self, pergunta, top_n=3):
+        """Recebe um pergunta e um inteiro(top_n), aplica essa pergunta no LLM e busca projetos cujo resumo tenha similaridade com a pergunta,
+        eetorna uma lista das palavras dos top_n projetos mais similares"""
         print("Buscando projetos com essa temática....")
         
         # Gera o embedding da pergunta
@@ -83,6 +87,8 @@ class AI:
         return palavras_chave_somadas
 
     def recomendar_pesquisadores(self, palavra_chave=[], top_n=10):
+        """Recebe umna lista de palavras chaves e busca todos os pesquisadores que ja fizeram parte de projetos 
+        com pelo menos uma dessas palavras chaves """
         self.participantes = {}
         print("Buscando pesquisadores....")
         for _, row in self.df.iterrows():
