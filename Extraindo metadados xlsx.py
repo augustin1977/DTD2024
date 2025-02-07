@@ -1,7 +1,7 @@
 import os
 import json
-import time
 import math
+from huggingface_hub import login
 import openpyxl
 from unidecode import unidecode
 import pandas as pd
@@ -9,13 +9,13 @@ from nltk.corpus import stopwords
 import nltk
 import re
 import matplotlib.pyplot as plt
-from collections import Counter,defaultdict
 import torch
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
-from transformers import BertForSequenceClassification, Trainer, TrainingArguments,AutoModel,AutoTokenizer
+from transformers import AutoModel,AutoTokenizer
 from datetime import date
+from key import huggings_TOKEN
 
 def normaliza_texto(texto):
 	texto_normalizado = unidecode(texto)
@@ -27,7 +27,15 @@ def calcula_pontos(ano):
 	k=0.8 #5 anos para uma área/linha de pesquisa morrer
 	result = (100*math.exp(k * (ano - ano_atual)))
 	return result
-
+def carrega_pesquisadores_ativos(endereco):
+	workbook = openpyxl.load_workbook(endereco)
+	sheet=workbook["Planilha1"]
+	dados=[]
+	for linha in range(2,sheet.max_row):
+		dados.append((sheet["A"+str(linha)].value).upper())
+	return dados
+ 
+ 
 class Importacao:
 	def __init__(self,pasta):
 		self.pasta=pasta
@@ -63,7 +71,7 @@ class Importacao:
 			registro['Resumo']=self.sheet["Q"+str(linha)].value
 			resumo_limpo= self.sheet["Q"+str(linha)].value.lower()
 			resumo_limpo=re.sub(r'[^\w\s]', '', resumo_limpo) 
-			resumo_limpo = ' '.join([word for word in resumo_limpo.split() if word not in self.stop_words])
+			#resumo_limpo = ' '.join([word for word in resumo_limpo.split() if word not in self.stop_words])
 			resumo_limpo = " ".join(self.sheet["P"+str(linha)].value.lower().strip().strip(".").split(';'))+' '+resumo_limpo
 			registro['Resumo_limpo']=resumo_limpo
 			registro['Equipe']=[]
@@ -125,7 +133,7 @@ class Importacao:
 class AI:
 	def __init__(self, df):
 		print("#### Iniciando o treinamento ####")
-		self.ai_model="neuralmind/bert-large-portuguese-cased"
+		self.ai_model="neuralmind/bert-base-portuguese-cased"
 		self.df = df
 		self.tokenizer = AutoTokenizer.from_pretrained(self.ai_model)
 		self.model = AutoModel.from_pretrained(self.ai_model)
@@ -168,7 +176,6 @@ class AI:
 
 	def buscar_resposta(self, pergunta, top_n=3):
 		print("Buscando projetos com essa temática....")
-		
 		# Gera o embedding da pergunta
 		embedding_pergunta = self.gerar_embedding(pergunta)
 		
@@ -185,66 +192,85 @@ class AI:
 		projetos_selecionados = self.df.iloc[indices]
 		
 		# Soma as palavras-chave dos projetos selecionados
-		palavras_chave_somadas = []
-		for pesquisador in projetos_selecionados['Equipe']:
-			if pesquisador not in palavras_chave_somadas:
-				palavras_chave_somadas.append(pesquisador)
+		pesquisadores_chaves = []
+		for pesquisadores in projetos_selecionados['Equipe']:
+			for pesquisador in pesquisadores:
+				if pesquisador not in pesquisadores_chaves:
+					pesquisadores_chaves.append(pesquisador)
 		
 		# Retorna os projetos selecionados e as palavras-chave somadas
 		self.projetos_selecionados=projetos_selecionados
-		return palavras_chave_somadas
+		return pesquisadores_chaves
 
-	def recomendar_pesquisadores(self, palavra_chave=[], top_n=10):
+	def recomendar_pesquisadores(self, lista_pesquisadores=[], pesquisadores_ativos=[],top_n=10):
 		self.participantes = {}
 		print("Buscando pesquisadores....")
-		print(self.projetos_selecionados)
+		projetos_selecionados=list(self.projetos_selecionados["Titulo"])
 		for _, row in self.df.iterrows():
-			if row["Titulo"] in self.projetos_selecionados["Titulo"]:
-				print(row["Titulo"])
+			if row["Titulo"] in projetos_selecionados:
 				for participante in row["Equipe"]:
 						pontos=calcula_pontos(row["Ano"])
-						# ~ print(participante,row["Ano"],pontos)
-						if participante in self.participantes:
-							self.participantes[participante] += pontos
-							
-						else:
-							self.participantes[participante] = pontos
+						if participante in lista_pesquisadores:
+							if participante in self.participantes:
+								self.participantes[participante] += pontos
+							else:
+								self.participantes[participante] = pontos
 		self.pesquisadores_ordenados = sorted(self.participantes.items(), key=lambda x: x[1], reverse=True)
-		print(self.pesquisadores_ordenados[:top_n*2])
-		return [pesquisador for pesquisador, _ in self.pesquisadores_ordenados[:top_n]]
+		print(self.pesquisadores_ordenados[:min(top_n*5,15)])
+		lista_pesquisadores_recomendados=[]
+		for pesquisador in self.pesquisadores_ordenados:
+			if pesquisador[0] in pesquisadores_ativos:
+				lista_pesquisadores_recomendados.append(pesquisador[0])
+
+      
+		return [pesquisador for pesquisador in lista_pesquisadores_recomendados[:top_n]]
 ################################################
-root=os.getcwd()
-endereco=os.path.join(root,"Extração de dados","Relatórios Biblioteca")
-print(endereco)
-planilha=Importacao(endereco)
-planilha.importa_dados()
-planilha.cria_json()
-df=planilha.get_df()
-ai=AI(df)
+def main():
+	login(token=huggings_TOKEN)
+	root=os.getcwd()
+	
+ 
+	endereco=os.path.join(root,"Extração de dados","Relatórios Biblioteca")
+	print(endereco)
+	planilha=Importacao(endereco)
+	planilha.importa_dados()
+	planilha.cria_json()
+	df=planilha.get_df()
+	print("Carregando Pesquisadores Ativos")
+	arquivo_pesquisadores_ativos=os.path.join(root,"Extração de dados","pesquisadores_ativos","pesquisadores_ativos.xlsx")
+	print(arquivo_pesquisadores_ativos)
+	pesquisadores_ativos=carrega_pesquisadores_ativos(arquivo_pesquisadores_ativos)
+	print(pesquisadores_ativos)
+	ai=AI(df)
 
-print("\n")
-print("BEM VINDO AO SISTEMA DE CONSULTA DE PESQUISADORES")
-print("\n")
-
-while(1):
-	NewSystem = input("Você gostaria de fazer uma consulta? (y ou n): ").lower()
 	print("\n")
-	if NewSystem == "y":
-		pergunta=input("Fale sobre o tipo de problema que vc está precisando de ajuda: ")
+	print("BEM VINDO AO SISTEMA DE CONSULTA DE PESQUISADORES")
+	print("\n")
+
+	while(1):
+		NewSystem = input("Você gostaria de fazer uma consulta? (y ou n): ").lower()
 		print("\n")
-		resposta=ai.buscar_resposta(pergunta, top_n=10)
-		
-		for _, projeto in ai.projetos_selecionados.iterrows():
-			print(f"Título: {projeto['Titulo']}")
-			# ~ print(f"Resumo: {projeto['Resumo']}")
-			# ~ print(f"Palavras-chave: {projeto['Palavras_chave']}")
-			# ~ print("-" * 50)
-		pesquisadores_ordenados=ai.recomendar_pesquisadores(palavra_chave=resposta,top_n=5)
-		print()
-		print("As pessoas que podem te ajudar são:",(pesquisadores_ordenados))
-		print()
-	else:
-		print("Obrigado por utilizar nosso sistema")
-		print("Desenvolvido por SmartConnect IPT")
-		print('\n')
-		break
+		if NewSystem == "y":
+			pergunta=input("Fale sobre o tipo de problema que vc está precisando de ajuda: ")
+			print("\n")
+			resposta=ai.buscar_resposta(pergunta, top_n=10,)
+			
+			for _, projeto in ai.projetos_selecionados.iterrows():
+				print(f"Título: {projeto['Titulo']}")
+				# ~ print(f"Resumo: {projeto['Resumo']}")
+				# ~ print(f"Palavras-chave: {projeto['Palavras_chave']}")
+				# ~ print("-" * 50)
+			
+			pesquisadores_ordenados=ai.recomendar_pesquisadores(lista_pesquisadores=resposta,
+                                                       top_n=5,
+                                                       pesquisadores_ativos=pesquisadores_ativos)
+			print()
+			print("As pessoas que podem te ajudar são:",(pesquisadores_ordenados))
+			print()
+		else:
+			print("Obrigado por utilizar nosso sistema")
+			print("Desenvolvido por SmartConnect IPT")
+			print('\n')
+			break
+if __name__ == "__main__":
+    main()
