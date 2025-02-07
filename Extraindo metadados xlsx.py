@@ -251,10 +251,14 @@ def main():
 		NewSystem = input("Você gostaria de fazer uma consulta? (y ou n): ").lower()
 		print("\n")
 		if NewSystem == "y":
-			pergunta=input("Fale sobre o tipo de problema que vc está precisando de ajuda: ")
+			pergunta=""
+			while(len(pergunta)<20):
+				pergunta=input("Fale sobre o tipo de problema que vc está precisando de ajuda: ")
+				if len(pergunta)<20:
+					print("Pergunta muito curta, por favor explique melhor sua demanda")
 			print("\n")
 			resposta=ai.buscar_resposta(pergunta, top_n=10,)
-			
+
 			for _, projeto in ai.projetos_selecionados.iterrows():
 				print(f"Título: {projeto['Titulo']}")
 				# ~ print(f"Resumo: {projeto['Resumo']}")
@@ -262,7 +266,7 @@ def main():
 				# ~ print("-" * 50)
 			
 			pesquisadores_ordenados=ai.recomendar_pesquisadores(lista_pesquisadores=resposta,
-                                                       top_n=5,
+                                                       top_n=6,
                                                        pesquisadores_ativos=pesquisadores_ativos)
 			print()
 			print("As pessoas que podem te ajudar são:",(pesquisadores_ordenados))

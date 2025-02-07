@@ -101,3 +101,8 @@ class Importacao:
 		print("Recuperando json")
 		self.recupera_json()
 		return self.dataframe
+	def get_pesquisadores(self):
+		self.recupera_json()
+		equipes=list(self.dataframe["Equipe"])
+		return equipes
+
