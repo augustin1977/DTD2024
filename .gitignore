@@ -20,9 +20,6 @@ __pycache__/
 
 # C extensions
 *.so
-
-#####Leo####Teste2222####
-
 # Distribution / packaging
 .Python
 build/
