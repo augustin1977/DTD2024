@@ -7,8 +7,6 @@ from nltk.corpus import stopwords
 import json
 import pandas as pd
 
-
-
 class Importacao:
 	def __init__(self,pasta):
 		"""Inicializa a classe importação"""
