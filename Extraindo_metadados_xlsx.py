@@ -96,7 +96,7 @@ class Importacao:
 		print("#####Importanto dados dos arquivos#####")
 		nltk.download('stopwords')
 		self.stop_words=set(stopwords.words('portuguese'))
-		print(self.stop_words)
+		# print(self.stop_words)
 		for arquivo in self.arquivos:
 			abre_arquivo=os.path.join(self.pasta,arquivo)
 			self.abre_arquivo(abre_arquivo)
@@ -229,7 +229,7 @@ def main():
 	login(token=huggings_TOKEN)
 	root=os.getcwd()
 	
- 
+	print
 	endereco=os.path.join(root,"Extração de dados","Relatórios Biblioteca")
 	print(endereco)
 	planilha=Importacao(endereco)
@@ -261,9 +261,6 @@ def main():
 
 			for _, projeto in ai.projetos_selecionados.iterrows():
 				print(f"Título: {projeto['Titulo']}")
-				# ~ print(f"Resumo: {projeto['Resumo']}")
-				# ~ print(f"Palavras-chave: {projeto['Palavras_chave']}")
-				# ~ print("-" * 50)
 			
 			pesquisadores_ordenados=ai.recomendar_pesquisadores(lista_pesquisadores=resposta,
                                                        top_n=6,
