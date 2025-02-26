@@ -10,19 +10,18 @@ from key import huggings_TOKEN
 
 login(token=huggings_TOKEN)
 root=os.getcwd()
-print(root)
+
 endereco=os.path.join(root,"Extração de dados","Relatórios Biblioteca")
-print(endereco)
+print("Preparando dados....")
 planilha=Importacao(endereco)
-planilha.importa_dados()
-planilha.cria_json()
+if not (os.path.exists('tokens.json') and os.path.exists('embeddings.npy')):
+    planilha.importa_dados()
+    planilha.cria_json()
 df=planilha.get_df()
 print("Carregando Pesquisadores Ativos")
 arquivo_pesquisadores_ativos=os.path.join(root,"Extração de dados","pesquisadores_ativos","pesquisadores_ativos.xlsx")
 pesquisadores_ativos=carrega_pesquisadores_ativos(arquivo_pesquisadores_ativos)
-
 ai=AI(df)
-
 
 @cl.on_chat_start
 async def on_chat_start():
