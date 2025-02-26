@@ -13,5 +13,9 @@ for registro in planilha.json:
         if pessoa not in equipe:
             equipe.append(pessoa)
 equipe.sort()
+arquivo= open("equipe.csv","w")
+arquivo.write("Nome pessoa\n")
 for pessoa in equipe:
+    arquivo.write(str(pessoa)+"\n")
     print(pessoa)
+arquivo.close()
