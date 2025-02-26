@@ -220,7 +220,7 @@ class AI:
 		lista_pesquisadores_recomendados=[]
 		for pesquisador in self.pesquisadores_ordenados:
 			if pesquisador[0] in pesquisadores_ativos:
-				lista_pesquisadores_recomendados.append(pesquisador[0])
+				lista_pesquisadores_recomendados.append([pesquisador[0],pesquisador[1]])
 
       
 		return [pesquisador for pesquisador in lista_pesquisadores_recomendados[:top_n]]

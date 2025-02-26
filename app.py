@@ -1,4 +1,5 @@
 import chainlit as cl
+import asyncio
 from Extraindo_metadados_xlsx import *
 import os
 from huggingface_hub import login
@@ -35,14 +36,26 @@ async def main(message: cl.Message):
         await cl.Message(content=f"Pergunta muito curta, tente explicar mais....").send()
         return
     resposta=ai.buscar_resposta(pergunta, top_n=10,)
-    resposta_ai="Os projetos que encontrei similaridade foram:\n"
+    resposta_ai="Estou buscando os projetos:\nOs projetos que encontrei similaridade foram:\n"
     for _, projeto in ai.projetos_selecionados.iterrows():
-        resposta_ai+=f"Título: {projeto['Titulo']}"+"\n"
+        resposta_ai+=f"Título: {projeto['Titulo']} Ano:{projeto['Ano']}"+"\n"
         
     pesquisadores_ordenados=ai.recomendar_pesquisadores(lista_pesquisadores=resposta,
                                                     top_n=6,
                                                     pesquisadores_ativos=pesquisadores_ativos)
-    pesquisadores="\n".join(pesquisadores_ordenados)
-    resposta_ai+=f"As pessoas que podem te ajudar são:\n{pesquisadores}"
-    await cl.Message(content=resposta_ai).send()
-
+    pesquisadores=[]
+    for pesquisador in pesquisadores_ordenados:
+        pesquisadores.append(f"Pesquisador: {pesquisador[0]} - Pontuação: {pesquisador[1]:.2f}")
+    
+    pesquisadores="\n".join(pesquisadores)
+    resposta_ai+=f"\n##########################\nAs pessoas que podem te ajudar são:\n{pesquisadores}"
+    ms=cl.Message(content="")
+    await ms.send()
+    for line in resposta_ai.strip().split("\n"):
+        await asyncio.sleep(0.8)  # Pequeno atraso entre cada linha
+        if "Os projetos que encontrei similaridade foram:" in line or "similaridade" in line:  
+            await asyncio.sleep(2)
+        elif "###" in line:
+            await asyncio.sleep(3)
+        await ms.stream_token(line + "\n")
+    await ms.stream_token("Espero que as informações tenha sido uteis, se quiser pesquisar mais, é só avisar.👍🏻\n")
