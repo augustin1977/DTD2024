@@ -57,4 +57,4 @@ async def main(message: cl.Message):
         elif "###" in line:
             await asyncio.sleep(3)
         await ms.stream_token(line + "\n")
-    await ms.stream_token("Espero que as informações tenha sido uteis, se quiser pesquisar mais, é só avisar.👍🏻\n")
+    await ms.stream_token("\n Espero que as informações tenham sido úteis. Caso deseje realizar uma nova consulta, é só avisar.👍🏻\n")
