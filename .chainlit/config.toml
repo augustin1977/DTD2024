@@ -41,11 +41,10 @@ edit_message = true
 [features.audio]
     # Sample rate of the audio
     sample_rate = 24000
-
 [UI]
 # Name of the assistant.
-name = "Assistant"
-
+name = "Smart Connect"
+custom_css = '/public/custom.css'
 # default_theme = "dark"
 
 # layout = "wide"
@@ -74,6 +73,12 @@ cot = "full"
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
+[UI.theme]
+
+primary = "#007bff"  # Azul principal
+secondary = "#0056b3"  # Azul mais escuro
+background = "#f0f8ff"  # Azul bem claro
+text = "#000000"  # Preto para bom contraste
 
 [meta]
 generated_by = "2.0.1"

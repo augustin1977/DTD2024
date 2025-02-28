@@ -12,10 +12,11 @@ for registro in planilha.json:
     for pessoa in planilha.json[registro]["Equipe"]:
         if pessoa not in equipe:
             equipe.append(pessoa)
+            print(pessoa, planilha.json[registro]["Ano"])
 equipe.sort()
 arquivo= open("equipe.csv","w")
 arquivo.write("Nome pessoa\n")
 for pessoa in equipe:
     arquivo.write(str(pessoa)+"\n")
-    print(pessoa)
+    
 arquivo.close()
