@@ -40,18 +40,18 @@ async def main(message: cl.Message):
         resposta_ai+=f"Título: {projeto['Titulo']} Ano:{projeto['Ano']}"+"\n"
         
     pesquisadores_ordenados=ai.recomendar_pesquisadores(lista_pesquisadores=resposta,
-                                                    top_n=6,
+                                                    top_n=10,
                                                     pesquisadores_ativos=pesquisadores_ativos)
     pesquisadores=[]
     for pesquisador in pesquisadores_ordenados:
         pesquisadores.append(f"Pesquisador: {pesquisador[0]} - Pontuação: {pesquisador[1]:.2f}")
     
     pesquisadores="\n".join(pesquisadores)
-    resposta_ai+=f"\n##########################\nAs pessoas que podem te ajudar são:\n{pesquisadores}"
+    resposta_ai+=f"##########################\nAs pessoas que podem te ajudar são:\n{pesquisadores}"
     ms=cl.Message(content="")
     await ms.send()
     for line in resposta_ai.strip().split("\n"):
-        await asyncio.sleep(0.8)  # Pequeno atraso entre cada linha
+        await asyncio.sleep(0.7)  # Pequeno atraso entre cada linha
         if "Os projetos que encontrei similaridade foram:" in line or "similaridade" in line:  
             await asyncio.sleep(2)
         elif "###" in line:

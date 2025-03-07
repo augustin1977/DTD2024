@@ -20,6 +20,12 @@ from key import huggings_TOKEN
 def normaliza_texto(texto):
 	texto_normalizado = unidecode(texto)
 	return texto_normalizado
+def normaliza_pontuacao(pesquisadores):
+    total_pontos= sum (pesquisadores.values())
+    if total_pontos==0:
+        return {nome:0 for nome in pesquisadores}
+    return {nome:pontos/total_pontos*100 for nome,pontos in pesquisadores.items()}
+
 
 #Peso para os anos mais recentes
 def calcula_pontos(ano):
@@ -215,8 +221,11 @@ class AI:
 								self.participantes[participante] += pontos
 							else:
 								self.participantes[participante] = pontos
+				
+		self.participantes=normaliza_pontuacao(self.participantes)
+				
 		self.pesquisadores_ordenados = sorted(self.participantes.items(), key=lambda x: x[1], reverse=True)
-		print(self.pesquisadores_ordenados[:min(top_n*5,15)])
+		# print(self.pesquisadores_ordenados[:min(top_n*5,15)])
 		lista_pesquisadores_recomendados=[]
 		for pesquisador in self.pesquisadores_ordenados:
 			if pesquisador[0] in pesquisadores_ativos:
@@ -238,9 +247,9 @@ def main():
 	df=planilha.get_df()
 	print("Carregando Pesquisadores Ativos")
 	arquivo_pesquisadores_ativos=os.path.join(root,"Extração de dados","pesquisadores_ativos","pesquisadores_ativos.xlsx")
-	print(arquivo_pesquisadores_ativos)
+	
 	pesquisadores_ativos=carrega_pesquisadores_ativos(arquivo_pesquisadores_ativos)
-	print(pesquisadores_ativos)
+	
 	ai=AI(df)
 
 	print("\n")
