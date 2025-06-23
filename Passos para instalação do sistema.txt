@@ -1,4 +1,4 @@
--Passos para instalação do sistema:
+Passos para instalação do sistema:
 1) Criar ambiente Virtual onde serão instalados todas as bibliotecas para executar o sistema.
 	1.1) Instalar o python na partir do endereço: https://www.python.org/
 	1.2) Criar uma pasta para o sistema
