@@ -12,6 +12,11 @@ v1.0 - backup/
 *.npy
 DTD2024.code-workspace
 *.code-workspace
+*.csv
+*.CSV
+
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
